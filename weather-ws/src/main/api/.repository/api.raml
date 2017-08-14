@@ -1,0 +1,58 @@
+#%RAML 0.8
+title: Weather API
+version: 1.0
+baseUri: http://api.weather.gov/stations/
+
+schemas:
+  - station: |
+      {
+        "properties": {
+          "code": {
+            "description": "The station ID",
+            "type": "string",
+            "required": true
+          },
+          "temp": {
+            "description": "Station temperature",
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "dewp": {
+            "description": "Station dewpoint",
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "heati": {
+            "description": "Station heat index",
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+/{ID}/observations/current:
+  get:
+    responses:
+      200:
+        body:
+          application/json:

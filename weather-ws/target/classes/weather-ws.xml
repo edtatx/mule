@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+    <http:listener-config name="NOAA-HTTP_Listener_Configuration"  host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <file:connector name="Weatherupdatefile" autoDelete="true" streaming="true" validateConnections="true" doc:name="File"/>
+    <flow name="getWeatherFlow">
+        <http:listener config-ref="NOAA-HTTP_Listener_Configuration" path="/" doc:name="NOAA (http)" allowedMethods="GET"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="f1ca3908-d6ff-4d1f-a7a6-d0dbf4b4edb9">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+[{
+	code: payload.properties.station,
+	temp: {
+		value: payload.properties.temperature.value,
+		unit: payload.properties.temperature.unitCode
+	},
+	dewp: {
+		value: payload.properties.dewpoint.value,
+		unit: payload.properties.dewpoint.unitCode
+	},
+	heati: {
+		value: payload.properties.heatIndex.value,
+		unit: payload.properties.heatIndex.unitCode
+	}
+}]]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+</mule>
