@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <sfdc:config name="Salesforce__Basic_Authentication" username="ed.tjarks@gmail.com" password="Flam!ng1960B" securityToken="sibLlVh1cHJBEkz7vb9ZguQA" doc:name="Salesforce: Basic Authentication"/>
+    <file:connector name="sfdcexample" writeToDirectory="/Users/etjarks/Downloads" autoDelete="true" streaming="true" validateConnections="true" doc:name="File"  outputPattern="sfdcexample.dat" outputAppend="true"/>
+    <flow name="mysalesforceexampleFlow1">
+        <sfdc:subscribe-topic config-ref="Salesforce__Basic_Authentication" topic="AccountsMonitor1" doc:name="Salesforce (Streaming)" metadata:id="30e6cc34-d01e-4364-aaa7-460768e53244" doc:description="PushTopic pushTopic = new PushTopic();
+pushTopic.Name = 'AccountMonitor1';
+pushTopic.Query = 'SELECT Id, Name, AccountNumber FROM account';
+pushTopic.ApiVersion = 40.0;
+pushTopic.NotifyForOperationCreate = true;
+pushTopic.NotifyForOperationUpdate = true;
+pushTopic.NotifyForOperationUndelete = true;
+pushTopic.NotifyForOperationDelete = true;
+
+insert pushTopic;"/>
+        <json:object-to-json-transformer mimeType="application/json" doc:name="Object to JSON" metadata:id="2c2faf18-08a8-4714-93f8-d1fa79be3412"/>
+        <file:outbound-endpoint path="/Users/etjarks/Downloads" connector-ref="sfdcexample" responseTimeout="10000" doc:name="File" mimeType="text/csv"/>
+    </flow>
+</mule>

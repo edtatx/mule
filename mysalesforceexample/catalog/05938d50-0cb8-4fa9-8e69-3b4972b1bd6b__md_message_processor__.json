@@ -1,0 +1,16 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "Accounts"
+        }
+    },
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "accountout"
+        }
+    },
+    "id": "05938d50-0cb8-4fa9-8e69-3b4972b1bd6b",
+    "version": "5.2.0.0"
+}

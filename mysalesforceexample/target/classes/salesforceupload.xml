@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <file:connector name="File" outputPattern="SFexample1.json" readFromDirectory="/Users/etjarks/Downloads" autoDelete="false" streaming="true" validateConnections="true" doc:name="File"/>
+    <json:json-to-object-transformer mimeType="application/json" name="JSON_to_Object" doc:name="JSON to Object"/>
+    <flow name="salesforceuploadFlow1">
+        <file:inbound-endpoint path="/Users/etjarks/Downloads" connector-ref="File" pollingFrequency="10000" responseTimeout="10000" mimeType="application/json" transformer-refs="JSON_to_Object" doc:name="File"/>
+        <json:json-to-object-transformer mimeType="application/json" doc:name="JSON to Object" metadata:id="f2cfdee3-d40d-4a93-aab0-a6fd5bfaca8f"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="9be63303-3e57-49a6-adcc-92baa569d15e">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+[{
+	Name: payload.Name,
+	AccountNumber: payload.AccountNumber,
+	Customer_ID__c: payload.Customer_ID__c
+}]]]></dw:set-payload>
+        </dw:transform-message>
+        <sfdc:upsert config-ref="Salesforce__Basic_Authentication" externalIdFieldName="Customer_ID__c" type="Account" doc:name="Salesforce">
+            <sfdc:objects ref="#[payload]"/>
+        </sfdc:upsert>
+    </flow>
+</mule>
