@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <flow name="mainSFDCflow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sfdc" allowedMethods="GET" doc:name="HTTP SFDC Input"/>
+        <set-variable variableName="object" value="#[message.inboundProperties.'http.query.params'.object]" doc:name="Set SFDC Object Var"/>
+        <choice doc:name="Choice">
+            <when expression="#[flowVars.object == &quot;accounts&quot;]">
+                <flow-ref name="getSFDCaccountsflow" doc:name="getSFDCaccountsflow"/>
+            </when>
+            <when expression="#[flowVars.object == &quot;cases&quot;]">
+                <flow-ref name="getSFDCcasesflow" doc:name="getSFDCcasesflow"/>
+            </when>
+            <when expression="#[flowVars.object == &quot;campingitems&quot;]">
+                <flow-ref name="getSFDCcampingitemsflow" doc:name="getSFDCcampingitemsflow"/>
+            </when>
+        </choice>
+        <validation:is-not-null message="Payload is Empty" value="#[payload]" doc:name="Validation"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="getSFDCaccountsflow">
+        <sfdc:query config-ref="Salesforce__Basic_Authentication" query="dsql:SELECT BillingCity,BillingCountry,BillingState,BillingStreet,Name FROM Account WHERE BillingPostalCode = '78747'" doc:name="Salesforce Accounts"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="getSFDCcasesflow">
+        <sfdc:query config-ref="Salesforce__Basic_Authentication" query="dsql:SELECT AccountId,CaseNumber,CreatedById,CreatedDate,Date_Due__c,Date_Reported__c,LastModifiedById,LastModifiedDate,Priority,Reason,Status,Subject,Type FROM Case ORDER BY CreatedDate ASC" doc:name="Salesforce Cases"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="getSFDCcampingitemsflow">
+        <sfdc:query config-ref="Salesforce__Basic_Authentication" query="dsql:SELECT CreatedById,CreatedDate,Name FROM Camping_Item__c ORDER BY CreatedDate ASC" doc:name="Salesforce Camping Items"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
